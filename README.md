@@ -71,3 +71,63 @@ Para a figura em questão, após montado o código e realizando alguns testes, p
 ~~~
 
 <img src="/imgs/cod_img.PNG" alt="ex1-original" width = 250px> <img src="/imgs/decod_img.PNG" alt="ex1-original" width = 250px>
+
+# Prática 4 - PREENCHIMENTO DE REGIÕES
+Para este exercício temos uma imagem com objetos dispostos no espaço. Nosso objetivo é identificar as "bolhas", realizando a contagem de quantas tem buraco e quantas não tem.
+
+<img src="/imgs/bubble1.PNG" alt="ex1-original" width = 250px> 
+
+Vendo a imagem, o primeiro desafio é remover as bolhas que tocam a borda da imagem, pois não da para saber com certeza se há ou não buracos nela, há que não conseguimos ver seu corpo completo. Para eliminar esses objetos foi construída uma lógica que varre as posições correspondentes à borda da imagem, caçando objetos que estejam nesse limite e preenchendos com a cor de fundo, para dar a impressão que foram retirados.
+~~~c++
+  width=image.cols;
+  height=image.rows;
+  p.x=0;
+  p.y=0;
+  n_objremovido = 0;
+  for(int i=0; i<height; i++){
+    for(int j=0; j<width; j++){
+      if(image.at<uchar>(i,j) == 255 && (i == 0 || i == height-1 || j == 0 || j == width-1)){
+        n_objremovido++;
+        p.x=j;
+        p.y=i;
+        floodFill(image,p,0);
+      }
+    }
+  }
+  image_sborda = image.clone();
+~~~
+
+<img src="/imgs/bubble2.PNG" alt="ex1-original" width = 250px> 
+Em seguida é utilizado flood fill para identificar e contar a quanmtidade de elementos na imagem
+~~~c++
+
+  n_objects = 0;
+  for(int i=0; i<height; i++){
+    for(int j=0; j<width; j++){
+      if(image.at<uchar>(i,j) == 255){
+        // achou um objeto
+        n_objects++;
+        p.x=j;
+        p.y=i;
+  	// preenche o objeto com o contador
+	floodFill(image,p,n_objects);
+      }
+    }
+  }
+  p.x=0;
+  p.y=0;
+  floodFill(image,p,255);
+
+  int buracos=0;
+  for(int i=0; i<height; i++){
+    for(int j=0; j<width; j++){
+      if(image.at<uchar>(i,j) == 0){
+        buracos++;
+        p.x=j;
+        p.y=i;
+		  floodFill(image,p,buracos);
+      }
+    }
+  }
+~~~
+<img src="/imgs/bubble3.PNG" alt="ex1-original" width = 250px> 
