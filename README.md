@@ -7,25 +7,6 @@ Discente: [Keven Alison](https://KevenAlison.github.io)
 Com base no código exemplos/pixels.cpp foi implementado um código que consiste em pegar os pontos definidos pelo usuário na entrada e transformar a região retangular definida por esses dois pontos em uma região negativa. Para isso, foi implementado um for que varre os pixels definidos pela região e define a cor de cada pixel através da função image.at<uchar>.  Para a implementação a imagem foi definida em grayscale para definir a cor máxima como 255, obtendo a cor negativa através da subtração desse valor pelo valor do pixel em grayscale.
 
 ~~~c++
-#include <iostream>
-#include <opencv2/opencv.hpp>
-
-using namespace cv;
-using namespace std;
-
-int main(int, char** argv){
-  Mat image;
-  int px1,py1,px2,py2;
-
-
-  image = imread(argv[1],IMREAD_GRAYSCALE);
-
-  if(!image.data){
-    cout << "Erro ao abrir a imagem" << std::endl;
-  }
-  namedWindow("Imagem Original",WINDOW_AUTOSIZE);
-  imshow("Imagem Original", image);
-
   cout << "Cordenada x1: "<<endl;
   cin >> px1;
   cout << "Cordenada y1: "<<endl;
@@ -41,16 +22,7 @@ int main(int, char** argv){
         image.at<uchar>(i,j)=255 - image.at<uchar>(i,j);
       }
     }
-    namedWindow("Negativo", WINDOW_AUTOSIZE);
-    imshow("Negativo", image);
-    imwrite("imagem_negativa.png",image);	
-    waitKey(); 
-       
-  }else{
-    cout<<"As coordenadas inseridas não estão dentro das proporções da imagem ou possuem valores incosistentes.";
-  }
-
-  return 0;
-}
-
 ~~~
+
+<img src="/imgs/p1.1.png" alt="ex1-original" width = 350px>
+<img src="/imgs/p1.2.png" alt="ex1-original" width = 350px>
