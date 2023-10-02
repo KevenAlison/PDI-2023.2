@@ -98,6 +98,7 @@ Vendo a imagem, o primeiro desafio é remover as bolhas que tocam a borda da ima
 ~~~
 
 <img src="/imgs/bubble2.PNG" alt="ex1-original" width = 250px> 
+
 Em seguida é utilizado flood fill para identificar e contar a quanmtidade de elementos na imagem
 ~~~c++
 
@@ -125,9 +126,10 @@ Em seguida é utilizado flood fill para identificar e contar a quanmtidade de el
         buracos++;
         p.x=j;
         p.y=i;
-		  floodFill(image,p,buracos);
+	floodFill(image,p,buracos);
       }
     }
   }
 ~~~
+
 <img src="/imgs/bubble3.PNG" alt="ex1-original" width = 250px> 
