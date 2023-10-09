@@ -24,7 +24,7 @@ Com base no código exemplos/pixels.cpp foi implementado um código que consiste
     }
 ~~~
 
-<img src="https://raw.githubusercontent.com/KevenAlison/PDI-2023.2/main/imgs/p1.1.PNG" alt="ex1-original" width="250px"> <img src="/imgs/p1.2.PNG" alt="ex1-original" width = 250px>
+<img src="/imgs/p1.1.PNG" alt="img1"> <img src="/imgs/p1.2.PNG" alt="ex1-original" width = 250px>
 
 
 # Prática 2 - TROCAR REGIÕES
