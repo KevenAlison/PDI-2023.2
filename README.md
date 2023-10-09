@@ -133,3 +133,173 @@ Em seguida é utilizado flood fill para identificar e contar a quanmtidade de el
 ~~~
 
 <img src="/imgs/bubble3.PNG" alt="ex1-original" width = 250px> 
+
+# Prática 5 - HISTOGRAMA & EQUALIZAÇÃO
+A prática a seguir tem como objetivo principal a implementação de um programa que utiliza como base a web cam para capturar imagens e realizar a equalização do histograma. Para meu caso, não foi possível utilizar a web cam por conta de algumas limitações do meu ambiente, então utilizei a mesma imagem base utilizada nos exemplos anteriores. O programa teve como base o exemplo histogram.cpp e basicamente extrai o histograma da imagem original grayscale e em seguida realiza a equalização, criando um novo histograma para a imagem equalizada. A equalização do histograma é facilmente realizada através da função equalizeHist.
+
+~~~c++
+
+    int histw = nbins, histh = nbins / 2;
+    Mat histImgegray(histh, histw, CV_8UC1, Scalar(0));
+    Mat histImgequalizado(histh, histw, CV_8UC1, Scalar(0));
+
+    while (1) {
+        image.copyTo(gray);
+
+        // Calculando histograma da imagem em escala de cinza original
+        calcHist(&gray, 1, 0, Mat(), histgray, 1,
+                 &nbins, &histrange,
+                 uniform, acummulate);
+
+        normalize(histgray, histgray, 0, histImgegray.rows, cv::NORM_MINMAX, -1, cv::Mat());
+
+        histImgegray.setTo(Scalar(0));
+
+        for(int i=0; i<nbins; i++){
+          line(histImgegray,
+               Point(i, histh),
+               Point(i, histh-cvRound(histgray.at<float>(i))),
+               Scalar(255), 1, 8, 0);
+        }
+
+        histImgegray.copyTo(gray(Rect(0, 0, nbins, histh)));
+
+        imshow("Grayscale", gray);
+
+        // Equalizar histograma
+        equalizeHist(image, iequalizado);
+
+        // Calculando histograma da imagem equalizada
+        calcHist(&iequalizado, 1, 0, Mat(), histequalizado, 1, &nbins, &histrange, uniform, acummulate);
+
+        // Normalizando
+        normalize(histequalizado, histequalizado, 0, histImgequalizado.rows, NORM_MINMAX, -1, Mat());
+
+        histImgequalizado.setTo(Scalar(0));
+
+        for (int i = 0; i < nbins; i++) {
+            line(histImgequalizado,
+                Point(i, histh),
+                Point(i, histh - cvRound(histequalizado.at<float>(i))),
+                Scalar(255, 255, 255), 1, 8, 0);
+        }
+
+        histImgequalizado.copyTo(iequalizado(Rect(0, 0, nbins, histh)));
+
+        imshow("Imagem Equalizada", iequalizado);
+
+        key = waitKey(30);
+        if (key == 27) break;
+    }
+    return 0;
+}
+
+~~~
+
+Com o código aplicado temos o seguinte resultado de saída para a imagem ghibli.png: 
+
+<img src="/imgs/histo_grayscale.PNG" alt="ex1-original" width = 250px> <img src="/imgs/histo_equalize.PNG" alt="ex1-original" width = 250px> 
+
+
+# Prática 6 - FILTROS LAPLACIANO E LAPLACIANO DO GAUSSIANO
+Para esta prática foi utilizado como referência o código filtroespacial.cpp, cuja funcionalidade conta com diversos filtros de imagem. O objetivo era implementar um filtro Laplaciano do gaussiano, e comparar com o filtro Laplaciano, que já estava implementado no código original.
+~~~c++
+
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+void printmask(cv::Mat &m) {
+  for (int i = 0; i < m.size().height; i++) {
+    for (int j = 0; j < m.size().width; j++) {
+      std::cout << m.at<float>(i, j) << ",";
+    }
+    std::cout << "\n";
+  }
+}
+
+int main(int, char ** argv) {
+  cv::Mat image, framegray, frame32f, frameFiltered;
+  float media[] = {0.1111, 0.1111, 0.1111, 0.1111, 0.1111,
+                   0.1111, 0.1111, 0.1111, 0.1111};
+  float gauss[] = {0.0625, 0.125,  0.0625, 0.125, 0.25,
+                   0.125,  0.0625, 0.125,  0.0625};
+  float horizontal[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+  float vertical[] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
+  float laplacian[] = {0, -1, 0, -1, 4, -1, 0, -1, 0};
+  float boost[] = {0, -1, 0, -1, 5.2, -1, 0, -1, 0};
+  float laplgauss [] ={0,0,-1,0,0,0,-1,-2,-1,0,-1,-2,16,-2,-1,
+                      0,-1,-2,-1,0,0,0,-1,0,0};
+  cv::Mat mask(3, 3, CV_32F), mask_scale;
+  cv::Mat result;
+  int absolut;
+  char key;
+
+  image = cv::imread(argv[1], cv::IMREAD_GRAYSCALE); // Carregar a imagem em escala de cinza
+  if (!image.data) {
+    std::cout << "Erro ao abrir a imagem" << std::endl;
+    return -1;
+  }
+
+  cv::namedWindow("filtro aplicado", cv::WINDOW_NORMAL);
+  cv::namedWindow("original", cv::WINDOW_NORMAL);
+
+  mask = cv::Mat(3, 3, CV_32F, media); // Inicializar a máscara
+  absolut = 1; // Calcula o valor absoluto da imagem
+
+  for (;;) {
+    cv::imshow("original", image);
+    image.convertTo(frame32f, CV_32F);
+    cv::filter2D(frame32f, frameFiltered, frame32f.depth(), mask, cv::Point(1, 1), 0);
+    if (absolut) {
+      frameFiltered = cv::abs(frameFiltered);
+    }
+
+    frameFiltered.convertTo(result, CV_8U);
+
+    cv::imshow("filtro aplicado", result);
+
+    key = (char)cv::waitKey(10);
+    if (key == 27) break; // Tecla Esc pressionada!
+    switch (key) {
+      case 'a':
+        absolut = !absolut;
+        break;
+      case 'm':
+        mask = cv::Mat(3, 3, CV_32F, media);
+        printmask(mask);
+        break;
+      case 'g':
+        mask = cv::Mat(3, 3, CV_32F, gauss);
+        printmask(mask);
+        break;
+      case 'h':
+        mask = cv::Mat(3, 3, CV_32F, horizontal);
+        printmask(mask);
+        break;
+      case 'v':
+        mask = cv::Mat(3, 3, CV_32F, vertical);
+        printmask(mask);
+        break;
+      case 'l':
+        mask = cv::Mat(3, 3, CV_32F, laplacian);
+        printmask(mask);
+        break;
+        case 'p':
+        mask = cv::Mat(5, 5, CV_32F, laplgauss);
+        printmask(mask);
+        break;
+      case 'b':
+        mask = cv::Mat(3, 3, CV_32F, boost);
+        break;
+      default:
+        break;
+    }
+  }
+  return 0;
+}
+~~~
+
+Como resultado é perceptível que o filtro Laplaciano do gaussiano possui maior atenuação nas regições de contorno da imagem, intensificando as bordas em comparação ao filtro gaussiano mais simples. Isso ocorre pois esse filtro funciona de forma a primeiro suavizar a imagem atraves do filtro gaussiano, o que torna as bordas mais nítidas e mais proeminentes devido ao efeito de suavização, e logo após é aplicado o Laplaciano, que detecta as bordas com mais precisão devido ao efeito do gaussiano.
+
+	
+<img src="/imgs/mean_filter.PNG" alt="ex1-original" width = 250px> + <img src="/imgs/lap_filter.PNG" alt="ex1-original" width = 250px> = <img src="/imgs/lapgauss_filter.PNG" alt="ex1-original" width = 250px> 
